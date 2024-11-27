@@ -17,9 +17,9 @@ type UserBasic struct {
 	Identity      string
 	ClientIp      string
 	ClientPort    string
-	LoginTime     time.Time
-	HeartbeatTime time.Time
-	LogOutTime    time.Time
+	LoginTime     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	HeartbeatTime time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	LogOutTime    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	IsLogout      bool
 	DeviceInfo    string
 }
@@ -35,4 +35,16 @@ func GetUserList() []*UserBasic {
 		fmt.Println(v)
 	}
 	return data
+}
+
+func CreateUser(user UserBasic) *gorm.DB {
+	return utils.DB.Create(&user)
+}
+
+func DeleteUser(user UserBasic) *gorm.DB {
+	return utils.DB.Delete(&user)
+}
+
+func UpdateUser(user UserBasic) *gorm.DB {
+	return utils.DB.Model(&user).Updates(UserBasic{Name: user.Name, PassWord: user.PassWord})
 }
