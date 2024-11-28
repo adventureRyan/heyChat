@@ -40,6 +40,14 @@ paths:
         in: formData
         name: password
         type: string
+      - description: 电话
+        in: formData
+        name: phone
+        type: string
+      - description: 邮箱
+        in: formData
+        name: email
+        type: string
       responses:
         "200":
           description: code","message"}

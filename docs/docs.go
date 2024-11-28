@@ -78,6 +78,18 @@ const docTemplate = `{
                         "description": "密码",
                         "name": "password",
                         "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "电话",
+                        "name": "phone",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "邮箱",
+                        "name": "email",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
