@@ -12,14 +12,15 @@ type UserBasic struct {
 	gorm.Model
 	Name          string
 	PassWord      string
+	Salt          string
 	Phone         string `valid:"matches(^1[3-9]{1}\\d{9}$)"`
 	Email         string `valid:"email"`
 	Identity      string
 	ClientIp      string
 	ClientPort    string
-	LoginTime     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	HeartbeatTime time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	LogOutTime    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	LoginTime     time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP"`
+	HeartbeatTime time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP"`
+	LogOutTime    time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP"`
 	IsLogout      bool
 	DeviceInfo    string
 }
@@ -40,8 +41,16 @@ func GetUserList() []*UserBasic {
 func FindUserByName(name string) UserBasic {
 	user := UserBasic{}
 	utils.DB.Where("name = ?", name).First(&user)
+	fmt.Print(user)
 	return user
 }
+
+//	func FindUserByNameAndPassword(name, password string) UserBasic {
+//		user := UserBasic{}
+//		utils.DB.Where("name = ? and pass_word = ?", name, password).First(&user)
+//		fmt.Println(user)
+//		return user
+//	}
 func FindUserByPhone(phone string) *gorm.DB {
 	user := UserBasic{}
 	return utils.DB.Where("Phone = ?", phone).First(&user)

@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 	"heyChat/models"
+	"heyChat/utils"
+	"math/rand"
 	"strconv"
 
 	"github.com/asaskevich/govalidator"
@@ -35,7 +37,7 @@ func CreateUser(c *gin.Context) {
 	user.Name = c.Query("name")
 	password := c.Query("password")
 	repassword := c.Query("repassword")
-
+	salt := fmt.Sprintf("%06d", rand.Int31())
 	data := models.FindUserByName(user.Name)
 	if data.Name != "" {
 		c.JSON(-1, gin.H{
@@ -49,7 +51,9 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	user.PassWord = password
+	// user.PassWord = password
+	user.PassWord = utils.MakePassword(password, salt)
+	user.Salt = salt
 	models.CreateUser(user)
 	c.JSON(200, gin.H{
 		"message": "新增用户成功",
@@ -103,4 +107,35 @@ func UpdateUser(c *gin.Context) {
 		})
 	}
 
+}
+
+// FindUserByName
+// @Summary 登录
+// @Tags 用户模块
+// @param name query string false "name"
+// @param password query string false "password"
+// @Success 200 {string} json{"code","message"}
+// @Router /user/FindUserByName [post]
+func FindUserByName(c *gin.Context) {
+	user := models.UserBasic{}
+	user.Name = c.Query("name")
+	user.PassWord = c.Query("password")
+	res_user := models.FindUserByName(user.Name)
+	if res_user.Name == "" {
+		c.JSON(200, gin.H{
+			"message": "没有这个用户",
+		})
+		return
+	}
+	cal_pass := utils.MakePassword(user.PassWord, res_user.Salt)
+	if cal_pass != res_user.PassWord {
+		c.JSON(200, gin.H{
+			"message": "密码错误",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "登录成功",
+	})
+	return
 }
