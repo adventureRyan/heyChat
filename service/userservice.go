@@ -6,6 +6,7 @@ import (
 	"heyChat/utils"
 	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,9 @@ func GetUserList(c *gin.Context) {
 	data := make([]*models.UserBasic, 10)
 	data = models.GetUserList()
 	c.JSON(200, gin.H{
-		"message": data,
+		"code":    1,
+		"message": "成功",
+		"data":    data,
 	})
 }
 
@@ -41,12 +44,14 @@ func CreateUser(c *gin.Context) {
 	data := models.FindUserByName(user.Name)
 	if data.Name != "" {
 		c.JSON(-1, gin.H{
+			"code":    -1,
 			"message": "用户名已经注册",
 		})
 		return
 	}
 	if password != repassword {
 		c.JSON(-1, gin.H{
+			"code":    -1,
 			"message": "两次密码不一致",
 		})
 		return
@@ -56,7 +61,9 @@ func CreateUser(c *gin.Context) {
 	user.Salt = salt
 	models.CreateUser(user)
 	c.JSON(200, gin.H{
+		"code":    1,
 		"message": "新增用户成功",
+		"data":    user,
 	})
 }
 
@@ -72,7 +79,9 @@ func DeleteUser(c *gin.Context) {
 	user.ID = uint(id)
 	models.DeleteUser(user)
 	c.JSON(200, gin.H{
+		"code":    1,
 		"message": "删除用户成功",
+		"data":    user,
 	})
 }
 
@@ -98,12 +107,15 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(200, gin.H{
+			"code":    -1,
 			"message": "修改参数不匹配",
 		})
 	} else {
 		models.UpdateUser(user)
 		c.JSON(200, gin.H{
+			"code":    1,
 			"message": "修改用户成功",
+			"data":    user,
 		})
 	}
 
@@ -112,17 +124,18 @@ func UpdateUser(c *gin.Context) {
 // FindUserByName
 // @Summary 登录
 // @Tags 用户模块
-// @param name query string false "name"
-// @param password query string false "password"
+// @param name formData string false "name"
+// @param password formData string false "password"
 // @Success 200 {string} json{"code","message"}
 // @Router /user/FindUserByName [post]
 func FindUserByName(c *gin.Context) {
 	user := models.UserBasic{}
-	user.Name = c.Query("name")
-	user.PassWord = c.Query("password")
+	user.Name = c.PostForm("name")
+	user.PassWord = c.PostForm("password")
 	res_user := models.FindUserByName(user.Name)
 	if res_user.Name == "" {
 		c.JSON(200, gin.H{
+			"code":    -1,
 			"message": "没有这个用户",
 		})
 		return
@@ -130,12 +143,18 @@ func FindUserByName(c *gin.Context) {
 	cal_pass := utils.MakePassword(user.PassWord, res_user.Salt)
 	if cal_pass != res_user.PassWord {
 		c.JSON(200, gin.H{
+			"code":    -1, // 1为成功,-1为失败
 			"message": "密码错误",
 		})
 		return
 	}
+	str := fmt.Sprintf("%d", time.Now().Unix())
+	temp := utils.Md5Encode(str)
+	utils.DB.Model(&res_user).Where("id=?", res_user.ID).Update("identity", temp)
 	c.JSON(200, gin.H{
+		"code":    1, // 1为成功,0为失败
 		"message": "登录成功",
+		"data":    res_user,
 	})
 	return
 }
