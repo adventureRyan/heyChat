@@ -128,14 +128,14 @@ func init() {
 // Implementation for sending UDP message
 func udpSendProc() {
 	con, err := net.DialUDP("udp", nil, &net.UDPAddr{
-		IP:   net.IPv4(192, 168, 122, 1),
+		IP:   net.IPv4(192, 168, 122, 255),
 		Port: 3000,
 	})
-	defer con.Close()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	defer con.Close()
 	for {
 		select {
 		case data := <-udpsendChan:
@@ -180,7 +180,7 @@ func dispatch(data []byte) {
 	}
 	switch msg.Type {
 	case 1: // private message
-		sendMsg(msg.FormId, data)
+		sendMsg(msg.TargetID, data)
 		// case 2:// bulk message
 		// 	sendGroupMsg()
 		// case 3:// broadcast
@@ -191,7 +191,7 @@ func dispatch(data []byte) {
 func sendMsg(userId int64, msg []byte) {
 	rwLocker.RLock()
 	node, ok := clientMap[userId]
-	rwLocker.Unlock()
+	rwLocker.RUnlock()
 	if ok {
 		node.DataQueue <- msg
 	}
