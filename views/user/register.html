@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>IM解决方案</title>
+    <link rel="stylesheet" href="/asset/plugins/mui/css/mui.css" />
+    <link rel="stylesheet" href="/asset/css/login.css" />
+    <link rel="icon" href="asset/images/favicon.ico" type="image/x-icon" />
+    <script src="/asset/plugins/mui/js/mui.js"></script>
+    <script src="/asset/js/vue.min.js"></script>
+    <script src="/asset/js/util.js"></script>
+</head>
+
+<body>
+
+    <header class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">注册</h1>
+    </header>
+    <div class="mui-content register-page" id="pageapp">
+        <form id='login-form' class="mui-input-group register-form">
+            <div class="mui-input-row">
+                <input v-model="user.name" placeholder="请输入用户名" type="text" class="mui-input-clear mui-input">
+            </div>
+            <div class="mui-input-row">
+                <input v-model="user.password" placeholder="请输入密码" type="password" class="mui-input-clear mui-input">
+            </div>
+            <div class="mui-input-row">
+                <input v-model="user.Identity" placeholder="再输入密码" type="password" class="mui-input-clear mui-input">
+            </div>
+        </form>
+        <div class="mui-content-padded">
+            <button @click="login" type="button" class="mui-btn mui-btn-block mui-btn-primary btn-register">注册</button>
+            <div class="link-area"><a id='reg' href="/index">登录账号</a> <span class="spliter">|</span> <a
+                    id='forgetPassword'>忘记密码</a>
+            </div>
+        </div>
+        <div class="mui-content-padded oauth-area">
+        </div>
+    </div>
+</body>
+
+</html>
+<script>
+    var app = new Vue({
+        el: "#pageapp",
+        data: function () {
+            return {
+                user: {
+                    name: "",
+                    password: "",
+                    Identity: "",
+                }
+            }
+        },
+        methods: {
+            login: function () {
+                const { name, password, Identity: repassword } = this.user;
+
+                // 检查必填项
+                if (!name || !password || !repassword) {
+                    mui.toast("用户名或密码不能为空");
+                    return;
+                }
+
+                if (password !== repassword) {
+                    mui.toast("两次输入的密码不一致");
+                    return;
+                }
+
+                // 构造表单数据
+                const formData = new URLSearchParams();
+                formData.append("name", name);
+                formData.append("password", password);
+                formData.append("repassword", repassword);
+
+                // 发送 POST 请求
+                mui.ajax('/user/createUser', {
+                    type: 'post',
+                    data: formData.toString(), // 转换为表单格式字符串
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    dataType: 'json', // 期望后端返回 JSON 格式
+                    success: function (res) {
+                        console.log("Response:", res);
+                        if (res.code !== 1) {
+                            mui.toast(res.message);
+                        } else {
+                            mui.toast("注册成功,即将跳转");
+                            location.href = "/";
+                        }
+                    },
+                    error: function (xhr, type, errorThrown) {
+                        console.error("Error:", type, errorThrown);
+                        mui.toast("请求失败，请检查网络");
+                    }
+                });
+            }
+        }
+    })
+</script>

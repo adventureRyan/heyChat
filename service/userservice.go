@@ -36,12 +36,12 @@ func GetUserList(c *gin.Context) {
 // @param password query string false "密码"
 // @param repassword query string false "确认密码"
 // @Success 200 {string} json{"code","message"}
-// @Router /user/createUser [get]
+// @Router /user/createUser [post]
 func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
-	user.Name = c.Query("name")
-	password := c.Query("password")
-	repassword := c.Query("repassword")
+	user.Name = c.PostForm("name")
+	password := c.PostForm("password")
+	repassword := c.PostForm("repassword")
 	salt := fmt.Sprintf("%06d", rand.Int31())
 	data := models.FindUserByName(user.Name)
 	if data.Name != "" {
