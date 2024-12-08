@@ -85,9 +85,10 @@
         .then(res => {
             console.log(res);
             if (res.code !== 0) {
-                alert(res.message);
-            } else {
-                const url = `/toChat?userId=${res.data.ID}&token=${res.data.Identity}`;
+                // alert(res.message);
+                // alert("helo")
+                // const url = `/toChat?userId=${res.data.ID}&token=${res.data.Identity}`;
+                const url = "http://localhost:8081/toChat?userId=" + res.data.ID + "&token="+res.data.Identity
                 alert('登录成功, 即将跳转');
                 window.location.href = url;
             }
